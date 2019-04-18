@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <iostream>
 
 #include "layer.h"
 #include "config.h"
@@ -15,9 +16,9 @@ Layer::Layer(uint16_t                input_count,
 	m_inputs  = vector(m_input_count);
 	m_outputs = vector(m_output_count);
 
-	m_weights.resize(m_output_count);
-	for (uint16_t i = 0; i < m_output_count; i++)
-		m_weights[i].resize(m_input_count + 1);
+	m_last_deltas.resize(m_output_count);
+	for (uint16_t d = 0; d < m_output_count; d++)
+		m_last_deltas[d] = vector(m_input_count, 0.0);
 }
 
 Layer::~Layer()
@@ -26,13 +27,15 @@ Layer::~Layer()
 
 vector& Layer::forward(const vector& inputs)
 {
-	for (uint16_t i = 0; i < m_outputs.size(); i++) {
-		double sum = m_weights[i][m_input_count];
+	m_inputs = inputs;
 
-		for (uint16_t j = 0; j < m_input_count; j++)
-			sum += inputs[j] * m_weights[i][j];
+	for (uint16_t p = 0; p < m_outputs.size(); p++) {
+		double sum = m_weights[p][m_input_count];
 
-		m_outputs[i] = sum;
+		for (uint16_t i = 0; i < m_input_count; i++)
+			sum += m_inputs[i] * m_weights[p][i];
+
+		m_outputs[p] = sum;
 	}
 
 	m_activation_func(m_outputs);
@@ -40,9 +43,53 @@ vector& Layer::forward(const vector& inputs)
 	return m_outputs;
 }
 
-vector& Layer::backward(const vector& inputs)
+void Layer::backward_output(const vector& target_outputs, vector& downstream_gradients)
 {
+	vector gradients(m_output_count);
+	downstream_gradients = vector(m_input_count, 0.0);
 
+	for (uint16_t p = 0; p < m_output_count; p++) {
+		gradients[p] = m_activation_func_deriv(m_outputs[p]) * (target_outputs[p] - m_outputs[p]);
+
+		for (uint16_t i = 0; i < m_input_count; i++) {
+			float delta = Config::Nn::learning_rate * gradients[p] * m_inputs[i];
+			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
+
+			downstream_gradients[i] += m_weights[p][i] * gradients[p];
+
+			m_last_deltas[p][i] = delta;
+		}
+	}
+}
+
+void Layer::backward_hidden(vector& downstream_gradients)
+{
+	for (uint16_t p = 0; p < m_output_count; p++) {
+		float gradient = m_activation_func_deriv(m_outputs[p]) * downstream_gradients[p];
+
+		for (uint16_t i = 0; i < m_input_count; i++) {
+			float delta = Config::Nn::learning_rate * gradient * m_inputs[i];
+			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
+
+			downstream_gradients[i] += m_weights[p][i] * gradient;
+
+			m_last_deltas[p][i] = delta;
+		}
+	}
+}
+
+void Layer::backward_last(const vector& downstream_gradients)
+{
+	for (uint16_t p = 0; p < m_output_count; p++) {
+		float gradient = m_activation_func_deriv(m_outputs[p]) * downstream_gradients[p];
+
+		for (uint16_t i = 0; i < m_input_count; i++) {
+			float delta = Config::Nn::learning_rate * gradient * m_inputs[i];
+			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
+
+			m_last_deltas[p][i] = delta;
+		}
+	}
 }
 
 void Layer::set_weights(const matrix& weights)
@@ -52,10 +99,12 @@ void Layer::set_weights(const matrix& weights)
 
 void Layer::set_random_weights()
 {
-	for (uint16_t i = 0; i < m_output_count; i++) {
-		for (uint16_t j = 0; j < m_input_count; j++)
-			m_weights[i][j] = generate_random_weight();
-		m_weights[i][m_input_count] = generate_random_weight();
+	m_weights.resize(m_output_count);
+	for (uint16_t p = 0; p < m_output_count; p++) {
+		m_weights[p].resize(m_input_count + 1);
+		for (uint16_t i = 0; i < m_input_count; i++)
+			m_weights[p][i] = generate_random_weight();
+		m_weights[p][m_input_count] = generate_random_weight();
 	}
 }
 

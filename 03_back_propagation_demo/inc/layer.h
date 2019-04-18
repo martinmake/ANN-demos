@@ -11,6 +11,7 @@ class Layer
 		matrix   m_weights;
 		vector   m_inputs;
 		vector   m_outputs;
+		matrix   m_last_deltas;
 		activation_func_t       m_activation_func;
 		activation_func_deriv_t m_activation_func_deriv;
 
@@ -22,7 +23,11 @@ class Layer
 		~Layer();
 
 		vector& forward(const vector& inputs);
-		vector& backward(const vector& inputs);
+
+		void backward_output(const vector& target_outputs, vector& downstream_gradients);
+		void backward_hidden(vector& downstream_gradients);
+		void backward_last  (const vector& downstream_gradients);
+
 		void set_weights(const matrix& weights);
 		void set_random_weights();
 		inline void show_weights(uint8_t precision) { show_data(m_weights, precision); }
