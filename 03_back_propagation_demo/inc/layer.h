@@ -18,6 +18,7 @@ class Layer
 		~Layer();
 
 		vector& forward(const vector& inputs);
+		vector& backward(const vector& inputs);
 		void set_weights(const matrix& weights);
 		void set_random_weights();
 		inline void show_weights(uint8_t precision) { show_data(m_weights, precision); }

@@ -12,7 +12,7 @@ int main(void)
 	Fcnn fcnn(Config::Nn::architecture, Config::Nn::activation_funcs);
 
 	std::cout << std::endl << "SETTING DUMMY WEIGHTS AND BIASES:" << std::endl;
-	fcnn.set_random_weights();
+	fcnn.set_weights(Config::Nn::Weights::initial_weights);
 	fcnn.show_weights(2);
 
 	std::cout << std::endl << "SETTING FIXED INPUTS:"         << std::endl;

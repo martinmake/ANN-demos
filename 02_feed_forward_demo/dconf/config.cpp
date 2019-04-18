@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "config.h"
 
 void relu(vector& sums)
@@ -7,8 +9,20 @@ void relu(vector& sums)
 			sums[i] = 0;
 }
 
-void softmax(vector& sums) // WIP
+void softmax(vector& sums)
 {
+	float max = sums[0];
+	for (uint16_t i = 0; i < sums.size(); i++) {
+		if (sums[i] > max)
+			max = sums[i];
+	}
+
+	float scale = 0.0;
+	for (uint16_t i = 0; i < sums.size(); i++)
+		scale += std::exp(sums[i] - max);
+
+	for (uint16_t i = 0; i < sums.size(); i++)
+		sums[i] = std::exp(sums[i] - max) / scale;
 }
 
 void passtrough(vector& sums)

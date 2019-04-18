@@ -1,4 +1,3 @@
-#include <iostream>
 #include <stdlib.h>
 
 #include "layer.h"
@@ -33,6 +32,11 @@ vector& Layer::forward(const vector& inputs)
 	m_activation_func(m_outputs);
 
 	return m_outputs;
+}
+
+vector& Layer::backward(const vector& inputs)
+{
+
 }
 
 void Layer::set_weights(const matrix& weights)

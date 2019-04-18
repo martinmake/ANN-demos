@@ -1,4 +1,5 @@
 #include <time.h>
+#include <math.h>
 
 #include "config.h"
 
@@ -9,8 +10,20 @@ void relu(vector& sums)
 			sums[i] = 0;
 }
 
-void softmax(vector& sums) // WIP
+void softmax(vector& sums)
 {
+	float max = sums[0];
+	for (uint16_t i = 0; i < sums.size(); i++) {
+		if (sums[i] > max)
+			max = sums[i];
+	}
+
+	float scale = 0.0;
+	for (uint16_t i = 0; i < sums.size(); i++)
+		scale += std::exp(sums[i] - max);
+
+	for (uint16_t i = 0; i < sums.size(); i++)
+		sums[i] = std::exp(sums[i] - max) / scale;
 }
 
 void passtrough(vector& sums)
@@ -33,6 +46,20 @@ namespace Config
 
 		namespace Weights
 		{
+			tensor initial_weights =
+			{
+				{
+					{ 0.01, 0.02, 0.03, 0.04 },
+					{ 0.05, 0.06, 0.07, 0.08 },
+					{ 0.09, 0.10, 0.11, 0.12 },
+					{ 0.13, 0.14, 0.15, 0.16 }
+				},
+				{
+					{ 0.17, 0.18, 0.19, 0.20, 0.21 },
+					{ 0.22, 0.23, 0.24, 0.25, 0.26 }
+				}
+			};
+
 			namespace Random_generation
 			{
 				uint16_t seed = time(nullptr);

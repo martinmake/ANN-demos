@@ -19,6 +19,7 @@ namespace Config
 
 		namespace Weights
 		{
+			extern tensor initial_weights;
 			namespace Random_generation
 			{
 				extern uint16_t seed;
