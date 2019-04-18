@@ -1,19 +1,35 @@
+# PROJECTS DIRS
 IDIRS:=inc
 DCDIR:=dconf
 SDIR :=src
 ODIR :=obj
 DDIR :=dep
 BDIR :=bin
+
+# PROJECT FILES
 ELF  :=$(BDIR)/main.elf
 HEX  :=$(BDIR)/main.hex
 BIN  :=$(BDIR)/main.bin
 ASM  :=$(BDIR)/main.asm
+
+# LIB DIRS
 LDIR :=$(HOME)/Documents/proj/PC/libs
 LIDIR:=$(LDIR)/inc
 LADIR:=$(LDIR)/arc
 
+# LIBS AND DEFS
 LIBS:=
 DEFS:=
+
+# TOOLCHAIN
+CC  :=gcc
+CXX :=g++
+ASMC:=gcc
+LD  :=g++
+
+# COMPILER FLAGS
+WARNING     :=-Wall -Wextra -pedantic -Wno-write-strings
+OPTIMIZATION:=-O3 -Ofast -fdata-sections -ffunction-sections -fno-exceptions
 
 ######END#OF#CONFIGURATION#VARIABLES######
 
@@ -38,35 +54,29 @@ IDIRS+=$(LIDIR)
 IDIRS+=$(DCDIR)
 INC:=$(addprefix -I,$(IDIRS))
 
-CC  :=gcc
-CXX :=g++
-ASMC:=gcc
-LD  :=g++
-
-WARNING :=-Wall -Wextra -pedantic -Wno-write-strings
 CCFLAGS :=$(WARNING) $(INC)  $(DEFS) -std=c99
 CXXFLAGS:=$(WARNING) $(INC)  $(DEFS) -std=c++14
 ASMFLAGS:=$(WARNING) $(INC)  $(DEFS)
-LDFLAGS :=$(WARNING) -L$(LADIR) -L$(DCDIR) -Wl,-R$(DCDIR)
+LDFLAGS :=$(WARNING) -L$(LADIR) -L$(DCDIR) -Wl,-R$(realpath $(DCDIR))
 
 .SECONDARY: $(OBJS)
 
 .PHONY: all
 all: $(DCONF) $(ELF)
-	@echo "> BULDING"
+	@echo "> BULDING $(notdir $(realpath .))"
 	objcopy -j .data -j .text -O ihex   $(ELF) $(HEX)
 	objcopy -j .data -j .text -O binary $(ELF) $(BIN)
 	objdump -Dz $(ELF) > $(ASM)
-	size $(HEX)
-	@echo "< BUILDING DONE"
+	size $(HEX) | sed -e 's/^/* /'
+	@echo "< BUILDING $(notdir $(realpath .)) DONE"
 
 $(DCONF):
 	+make -C $(DCDIR)
 
 $(ELF): $(OBJS)
-	@echo "> LINKING"
+	@echo "> LINKING $^"
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $@
-	@echo "< LINKING DONE"
+	@echo "< LINKING $^ DONE"
 
 $(ODIR)/%.o: $(SDIR)/%.c
 	@echo "> COMPILING: $<"
@@ -96,7 +106,7 @@ $(DDIR)/%.d: $(SDIR)/%.S
 
 .PHONY: dconf
 dconf:
-	+make -C $(DCDIR)
+	+make -C $(DCDIR) | sed 's/^/\t/'
 
 .PHONY: setup
 setup:
@@ -107,10 +117,10 @@ setup:
 
 .PHONY: clean
 clean:
-	@echo "> CLEANING"
-	-rm -vfr ./$(ODIR)/* ./$(DDIR)/* ./$(BDIR)/*
-	+make -C $(DCDIR) clean
-	@echo "< CLEANING DONE"
+	@echo "> CLEANING $(notdir $(realpath .))"
+	-rm -vfr ./$(ODIR)/* ./$(DDIR)/* ./$(BDIR)/* | sed -e 's/^/* /'
+	+make -C $(DCDIR) clean | sed 's/^/\t/'
+	@echo "< CLEANING $(notdir $(realpath .)) DONE"
 
 ifeq ($(NODEP),)
 -include $(patsubst $(SDIR)/%.c,  $(DDIR)/%.d,$(C_SRCS)  )

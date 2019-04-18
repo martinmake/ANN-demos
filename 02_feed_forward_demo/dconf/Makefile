@@ -22,25 +22,25 @@ LIBFLAGS:=-shared
 all: $(SHARED)
 
 $(SHARED): $(OBJS)
-	@echo "> BUILDING $<"
+	@echo "> BUILDING $(notdir $(realpath .))"
 	$(LIB) $(LIBFLAGS) $^ -o $@
-	@echo "< DONE BUILDING $<"
+	@echo "< BUILDING $(notdir $(realpath .)) DONE"
 
 $(ODIR)/%.o: $(SDIR)/%.c
 	@echo "> COMPILING: $<"
 	$(CC)   $(CCFLAGS) -c $< -o $@
-	@echo "< DONE COMPILING: $<"
+	@echo "< COMPILING: $< DONE"
 $(ODIR)/%.o: $(SDIR)/%.cpp
 	@echo "> COMPILING: $<"
 	$(CXX)  $(CXXFLAGS) -c $< -o $@
-	@echo "< DONE COMPILING: $<"
+	@echo "< COMPILING: $< DONE"
 $(ODIR)/%.o: $(SDIR)/%.S
 	@echo "> COMPILING: $<"
 	$(ASMC) $(ASMFLAGS) -c $< -o $@
-	@echo "< DONE COMPILING: $<"
+	@echo "< COMPILING: $< DONE"
 
 .PHONY: clean
 clean:
-	@echo "> CLEANING"
-	-rm -vf $(SHARED) $(OBJS)
-	@echo "< DONE CLEANING"
+	@echo "> CLEANING $(notdir $(realpath .))"
+	-rm -vf $(SHARED) $(OBJS) | sed -e 's/^/* /'
+	@echo "< CLEANING $(notdir $(realpath .)) DONE"
