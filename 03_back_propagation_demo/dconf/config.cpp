@@ -3,14 +3,21 @@
 
 #include "config.h"
 
-void relu(vector& sums)
+inline void relu(vector& sums)
 {
 	for (uint16_t i = sums.size() - 1; i; i--)
 		if (sums[i] < 0)
 			sums[i] = 0;
 }
+inline float relu_deriv(float output)
+{
+	if (output > 0)
+		return 1;
+	else
+		return 0;
+}
 
-void softmax(vector& sums)
+inline void softmax(vector& sums)
 {
 	float max = sums[0];
 	for (uint16_t i = 0; i < sums.size(); i++) {
@@ -25,17 +32,26 @@ void softmax(vector& sums)
 	for (uint16_t i = 0; i < sums.size(); i++)
 		sums[i] = std::exp(sums[i] - max) / scale;
 }
-
-void passtrough(vector& sums)
+inline float softmax_deriv(float output)
 {
+	return output * (1 - output);
+}
+
+inline void passtrough(vector& sums)
+{
+}
+inline float passtrough_deriv(float output)
+{
+	return 1;
 }
 
 namespace Config
 {
 	namespace Nn
 	{
-		std::vector<uint16_t> architecture              = { 3, 4   , 2       };
-		std::vector<activation_func_t> activation_funcs = {    relu, softmax };
+		std::vector<uint16_t>                architecture            = { 3,          4,               2        };
+		std::vector<activation_func_t>       activation_funcs        = { /* input */ relu,            softmax  };
+		std::vector<activation_func_deriv_t> activation_funcs_derivs = { /* input */ relu_deriv, softmax_deriv };
 
 		float    learning_rate = 0.05;
 		float    momentum      = 0.01;

@@ -3,8 +3,14 @@
 #include "layer.h"
 #include "config.h"
 
-Layer::Layer(uint16_t input_count, uint16_t output_count, activation_func_t activation_func)
-	: m_input_count(input_count), m_output_count(output_count), m_activation_func(activation_func)
+Layer::Layer(uint16_t                input_count,
+	     uint16_t                output_count,
+	     activation_func_t       activation_func,
+	     activation_func_deriv_t activation_func_deriv)
+	: m_input_count          (input_count),
+	  m_output_count         (output_count),
+	  m_activation_func      (activation_func),
+	  m_activation_func_deriv(activation_func_deriv)
 {
 	m_inputs  = vector(m_input_count);
 	m_outputs = vector(m_output_count);

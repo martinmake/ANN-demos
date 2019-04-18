@@ -7,8 +7,9 @@ namespace Config
 {
 	namespace Nn
 	{
-		extern std::vector<uint16_t> architecture;
-		extern std::vector<activation_func_t> activation_funcs;
+		extern std::vector<uint16_t>                architecture;
+		extern std::vector<activation_func_t>       activation_funcs;
+		extern std::vector<activation_func_deriv_t> activation_funcs_derivs;
 
 		extern float    learning_rate;
 		extern float    momentum;
@@ -20,6 +21,7 @@ namespace Config
 		namespace Weights
 		{
 			extern tensor initial_weights;
+
 			namespace Random_generation
 			{
 				extern uint16_t seed;

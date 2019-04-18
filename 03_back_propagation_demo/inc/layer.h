@@ -11,10 +11,14 @@ class Layer
 		matrix   m_weights;
 		vector   m_inputs;
 		vector   m_outputs;
-		activation_func_t m_activation_func;
+		activation_func_t       m_activation_func;
+		activation_func_deriv_t m_activation_func_deriv;
 
 	public:
-		Layer(uint16_t input_count, uint16_t output_count, activation_func_t activation_func);
+		Layer(uint16_t                input_count,
+		      uint16_t                output_count,
+		      activation_func_t       activation_func,
+		      activation_func_deriv_t activation_func_deriv);
 		~Layer();
 
 		vector& forward(const vector& inputs);
