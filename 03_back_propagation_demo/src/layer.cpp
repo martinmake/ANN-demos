@@ -18,7 +18,7 @@ Layer::Layer(uint16_t                input_count,
 
 	m_last_deltas.resize(m_output_count);
 	for (uint16_t d = 0; d < m_output_count; d++)
-		m_last_deltas[d] = vector(m_input_count, 0.0);
+		m_last_deltas[d] = vector(m_input_count + 1, 0.0);
 }
 
 Layer::~Layer()
@@ -45,20 +45,20 @@ vector& Layer::forward(const vector& inputs)
 
 void Layer::backward_output(const vector& target_outputs, vector& downstream_gradients)
 {
-	vector gradients(m_output_count);
 	downstream_gradients = vector(m_input_count, 0.0);
 
 	for (uint16_t p = 0; p < m_output_count; p++) {
-		gradients[p] = m_activation_func_deriv(m_outputs[p]) * (target_outputs[p] - m_outputs[p]);
+		float gradient = m_activation_func_deriv(m_outputs[p]) * (target_outputs[p] - m_outputs[p]);
 
 		for (uint16_t i = 0; i < m_input_count; i++) {
-			float delta = Config::Nn::learning_rate * gradients[p] * m_inputs[i];
+			float delta = Config::Nn::learning_rate * gradient * m_inputs[i];
 			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
-
-			downstream_gradients[i] += m_weights[p][i] * gradients[p];
-
+			downstream_gradients[i] += m_weights[p][i] * gradient;
 			m_last_deltas[p][i] = delta;
 		}
+		float delta = Config::Nn::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
 	}
 }
 
@@ -69,12 +69,14 @@ void Layer::backward_hidden(vector& downstream_gradients)
 
 		for (uint16_t i = 0; i < m_input_count; i++) {
 			float delta = Config::Nn::learning_rate * gradient * m_inputs[i];
+
 			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
-
 			downstream_gradients[i] += m_weights[p][i] * gradient;
-
 			m_last_deltas[p][i] = delta;
 		}
+		float delta = Config::Nn::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
 	}
 }
 
@@ -85,10 +87,13 @@ void Layer::backward_last(const vector& downstream_gradients)
 
 		for (uint16_t i = 0; i < m_input_count; i++) {
 			float delta = Config::Nn::learning_rate * gradient * m_inputs[i];
-			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
 
+			m_weights[p][i] += delta + Config::Nn::momentum * m_last_deltas[p][i];
 			m_last_deltas[p][i] = delta;
 		}
+		float delta = Config::Nn::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
 	}
 }
 

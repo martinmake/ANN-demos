@@ -15,7 +15,7 @@ int main(void)
 
 	std::cout << std::endl << "SETTING DUMMY WEIGHTS AND BIASES:" << std::endl;
 	fcnn.set_weights(Config::Nn::Weights::initial_weights);
-// 	fcnn.set_random_weights();
+ //	fcnn.set_random_weights();
 	fcnn.show_weights(4);
 
 	std::cout << std::endl << "SETTING FIXED INPUTS:"         << std::endl;
