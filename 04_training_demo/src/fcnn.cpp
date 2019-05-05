@@ -60,14 +60,20 @@ void Fcnn::train(matrix& dataset)
 			       target_outputs(&dataset_training[d][m_input_count], &dataset_training[d][dataset_training[d].size()]);
 
 			backward(inputs, target_outputs);
+
+		// 	std::cout << "TARGER: ";
+ 		// 	show_data(target_outputs, 4);
+		// 	std::cout << "OUTPUT: ";
+ 		// 	show_data(m_outputs, 4);
+
 			if (is_correct(target_outputs))
 				accuracy.training++;
 		}
 
- 		if (epoch % 100 == 0) {
- 			printf("EPOCH: %7u\t\tOUTPUTS:\t", epoch);
- 			show_data(m_outputs, 4);
- 		}
+ 	// 	if (epoch % 100 == 0) {
+ 	// 		printf("EPOCH: %7u\t\tOUTPUTS:\t", epoch);
+ 	// 		show_data(m_outputs, 4);
+ 	// 	}
  	}
 	accuracy.training /= Config::Nn::Training::max_epochs * dataset_training.size();
 

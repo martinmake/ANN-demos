@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <time.h>
 #include <math.h>
 
@@ -20,13 +21,28 @@ inline float relu_deriv(float output)
 		return 0;
 }
 
+inline void tanh(vector& sums)
+{
+	for (uint16_t i = sums.size() - 1; i; i--) {
+		if (sums[i] < -20.0)
+			sums[i] = -1;
+		else if (sums[i] > +20.0)
+			sums[i] = +1;
+		else
+			sums[i] = std::tanh(sums[i]);
+	}
+}
+inline float tanh_deriv(float output)
+{
+	if (output > 0)
+		return 1;
+	else
+		return 0;
+}
+
 inline void softmax(vector& sums)
 {
-	float max = sums[0];
-	for (uint16_t i = 0; i < sums.size(); i++) {
-		if (sums[i] > max)
-			max = sums[i];
-	}
+	float max = *std::max_element(sums.begin(), sums.end());
 
 	float scale = 0.0;
 	for (uint16_t i = 0; i < sums.size(); i++)
@@ -78,7 +94,7 @@ inline matrix& load_iris(void)
 			data.push_back(0.0);
 			data.push_back(0.0);
 		} else {
-			std::cout << "ERROR: \"" << cell << "\"IS INVALID SPECIES!)" << std::endl;
+			std::cout << "ERROR: \"" << cell << "\" IS INVALID SPECIES!)" << std::endl;
 			exit(1);
 		}
 
@@ -93,8 +109,8 @@ namespace Config
 	namespace Nn
 	{
 		std::vector<uint16_t>                architecture            = { 4,          7,          3             };
-		std::vector<activation_func_t>       activation_funcs        = { /* input */ relu,       softmax       };
-		std::vector<activation_func_deriv_t> activation_funcs_derivs = { /* input */ relu_deriv, softmax_deriv };
+		std::vector<activation_func_t>       activation_funcs        = { /* input */ tanh,       softmax       };
+		std::vector<activation_func_deriv_t> activation_funcs_derivs = { /* input */ tanh_deriv, softmax_deriv };
 
 		namespace Training
 		{
