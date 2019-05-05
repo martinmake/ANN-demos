@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <time.h>
 #include <math.h>
 
@@ -45,6 +48,46 @@ inline float passtrough_deriv(float output)
 	return 1;
 }
 
+inline matrix& load_iris(void)
+{
+	matrix* dataset = new matrix();
+	std::ifstream dataset_csv(Config::Nn::Dataset::path);
+
+	for (std::string line; getline(dataset_csv, line); )
+	{
+		std::stringstream line_stream(line);
+		vector data;
+
+		for (uint8_t i = 0; i < 4; i++) {
+			std::string cell;
+			getline(line_stream, cell, ',');
+			data.push_back(stof(cell));
+		}
+		std::string cell;
+		getline(line_stream, cell);
+		if (cell == "setosa") {
+			data.push_back(0.0);
+			data.push_back(0.0);
+			data.push_back(1.0);
+		} else if (cell == "versicolor") {
+			data.push_back(0.0);
+			data.push_back(1.0);
+			data.push_back(0.0);
+		} else if (cell == "virginica") {
+			data.push_back(1.0);
+			data.push_back(0.0);
+			data.push_back(0.0);
+		} else {
+			std::cout << "ERROR: \"" << cell << "\"IS INVALID SPECIES!)" << std::endl;
+			exit(1);
+		}
+
+		dataset->push_back(data);
+	}
+
+	return *dataset;
+}
+
 namespace Config
 {
 	namespace Nn
@@ -62,14 +105,18 @@ namespace Config
 
 			namespace Dataset
 			{
-				float training_size = 0.8;
-				float test_size     = 1 - training_size;
+				namespace Fraction
+				{
+					float training = 0.8;
+					float testing  = 1 - training;
+				}
 			}
 		}
 
 		namespace Dataset
 		{
-			std::string path = "nn/dataset.bin";
+			std::string path = "nn/datasets/iris.csv";
+			load_func_t load_func = load_iris;
 		}
 
 		namespace Weights

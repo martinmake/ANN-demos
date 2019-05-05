@@ -12,6 +12,8 @@ using tensor = std::vector<std::vector<std::vector<float>>>;
 using activation_func_t       = void  (*)(vector& sums);
 using activation_func_deriv_t = float (*)(float outputs);
 
+using load_func_t = matrix& (*)(void);
+
 template <typename T>
 extern void show_data(const T& data, uint8_t precision);
 

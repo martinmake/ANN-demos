@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <stdlib.h>
 
 #include "fcnn.h"
@@ -35,29 +36,56 @@ vector& Fcnn::forward(const vector& inputs)
 	return m_outputs;
 }
 
-void Fcnn::backward(const vector& target_outputs, const vector& inputs)
+void Fcnn::backward(const vector& inputs, const vector& target_outputs)
 {
 	forward(inputs);
 
-	vector downstream_gradients;
-	m_layers.back().backward_output(target_outputs, downstream_gradients);
-	for (uint8_t l = m_layers.size() - 2; l > 0; l--)
-		m_layers[l].backward_hidden(downstream_gradients);
-	m_layers[0].backward_last(downstream_gradients);
+ 	vector downstream_gradients;
+ 	m_layers.back().backward_output(target_outputs, downstream_gradients);
+ 	for (uint8_t l = m_layers.size() - 2; l > 0; l--)
+ 		m_layers[l].backward_hidden(downstream_gradients);
+ 	m_layers[0].backward_last(downstream_gradients);
 }
 
-float Fcnn::train(void)
+void Fcnn::train(matrix& dataset)
 {
-	std::cout << std::endl;
-	for (uint16_t epoch = 0; epoch <= Config::Nn::Training::max_epochs; epoch++) {
-		backward(target_outputs, inputs);
-		if (epoch % 100 == 0) {
-			printf("EPOCH: %7u\t\tOUTPUTS: ", epoch);
-			show_data(m_outputs, 4);
-		}
-	}
+	std::random_shuffle(dataset.begin(), dataset.end());
 
-	return 0.0;
+	matrix dataset_training(&dataset[0], &dataset[dataset.size() * Config::Nn::Training::Dataset::Fraction::training]),
+	       dataset_testing(&dataset[dataset.size() * Config::Nn::Training::Dataset::Fraction::training], &dataset[dataset.size()]);
+
+ 	for (uint16_t epoch = 0; epoch <= Config::Nn::Training::max_epochs; epoch++) {
+		for (uint16_t d = 0; d < dataset_training.size(); d++) {
+			vector inputs        (&dataset_training[d][0], &dataset_training[d][m_input_count]),
+			       target_outputs(&dataset_training[d][m_input_count], &dataset_training[d][dataset_training[d].size()]);
+
+			backward(inputs, target_outputs);
+			if (is_correct(target_outputs))
+				accuracy.training++;
+		}
+
+ 		if (epoch % 100 == 0) {
+ 			printf("EPOCH: %7u\t\tOUTPUTS:\t", epoch);
+ 			show_data(m_outputs, 4);
+ 		}
+ 	}
+	accuracy.training /= Config::Nn::Training::max_epochs * dataset_training.size();
+
+ 	test(dataset_testing);
+}
+
+void Fcnn::test(const matrix& dataset)
+{
+// 	std::cout << std::endl;
+// 	for (uint16_t epoch = 0; epoch <= Config::Nn::Training::max_epochs; epoch++) {
+// 		forward(target_outputs, inputs);
+// 		if (epoch % 100 == 0) {
+// 			printf("EPOCH: %7u\t\tOUTPUTS: ", epoch);
+// 			show_data(m_outputs, 4);
+// 		}
+// 	}
+
+	accuracy.testing /= dataset.size();
 }
 
 void Fcnn::set_weights(const tensor& weights)
@@ -79,4 +107,10 @@ void Fcnn::show_weights(uint8_t precision)
 		std::cout << std::endl;
 		m_layers[l].show_weights(precision);
 	}
+}
+
+
+bool Fcnn::is_correct(const vector& desired)
+{
+	return std::distance(desired.begin(), std::max_element(desired.begin(), desired.end())) == std::distance(m_outputs.begin(), std::max_element(m_outputs.begin(), m_outputs.end()));
 }

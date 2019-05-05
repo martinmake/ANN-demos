@@ -20,14 +20,18 @@ namespace Config
 
 			namespace Dataset
 			{
-				extern float training_size;
-				extern float test_size;
+				namespace Fraction
+				{
+					extern float training;
+					extern float testing;
+				}
 			}
 		}
 
 		namespace Dataset
 		{
 			extern std::string path;
+			extern load_func_t load_func;
 		}
 
 		namespace Weights
