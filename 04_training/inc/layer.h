@@ -1,5 +1,5 @@
-#ifndef _FEED_FORWARD_DEMO_LAYER_H_
-#define _FEED_FORWARD_DEMO_LAYER_H_
+#ifndef _ANNDEMOS_TRAINING_LAYER_H_
+#define _ANNDEMOS_TRAINING_LAYER_H_
 
 #include "datatypes.h"
 

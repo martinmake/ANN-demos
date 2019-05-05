@@ -43,22 +43,41 @@ vector& Layer::forward(const vector& inputs)
 	return m_outputs;
 }
 
-void Layer::backward_output(const vector& target_outputs, vector& downstream_gradients)
+void Layer::get_(const vector& target_outputs, vector& downstream_gradients)
 {
-	vector gradients(m_output_count);
 	downstream_gradients = vector(m_input_count, 0.0);
 
 	for (uint16_t p = 0; p < m_output_count; p++) {
-		gradients[p] = m_activation_func_deriv(m_outputs[p]) * (target_outputs[p] - m_outputs[p]);
+		float gradient = m_activation_func_deriv(m_outputs[p]) * (target_outputs[p] - m_outputs[p]);
 
 		for (uint16_t i = 0; i < m_input_count; i++) {
-			float delta = Config::Nn::Training::learning_rate * gradients[p] * m_inputs[i];
+			float delta = Config::Nn::Training::learning_rate * gradient * m_inputs[i];
 			m_weights[p][i] += delta + Config::Nn::Training::momentum * m_last_deltas[p][i];
-
-			downstream_gradients[i] += m_weights[p][i] * gradients[p];
-
+			downstream_gradients[i] += m_weights[p][i] * gradient;
 			m_last_deltas[p][i] = delta;
 		}
+		float delta = Config::Nn::Training::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::Training::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
+	}
+}
+
+void Layer::backward_output(const vector& target_outputs, vector& downstream_gradients)
+{
+	downstream_gradients = vector(m_input_count, 0.0);
+
+	for (uint16_t p = 0; p < m_output_count; p++) {
+		float gradient = m_activation_func_deriv(m_outputs[p]) * (target_outputs[p] - m_outputs[p]);
+
+		for (uint16_t i = 0; i < m_input_count; i++) {
+			float delta = Config::Nn::Training::learning_rate * gradient * m_inputs[i];
+			m_weights[p][i] += delta + Config::Nn::Training::momentum * m_last_deltas[p][i];
+			downstream_gradients[i] += m_weights[p][i] * gradient;
+			m_last_deltas[p][i] = delta;
+		}
+		float delta = Config::Nn::Training::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::Training::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
 	}
 }
 
@@ -69,12 +88,14 @@ void Layer::backward_hidden(vector& downstream_gradients)
 
 		for (uint16_t i = 0; i < m_input_count; i++) {
 			float delta = Config::Nn::Training::learning_rate * gradient * m_inputs[i];
+
 			m_weights[p][i] += delta + Config::Nn::Training::momentum * m_last_deltas[p][i];
-
 			downstream_gradients[i] += m_weights[p][i] * gradient;
-
 			m_last_deltas[p][i] = delta;
 		}
+		float delta = Config::Nn::Training::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::Training::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
 	}
 }
 
@@ -85,10 +106,13 @@ void Layer::backward_last(const vector& downstream_gradients)
 
 		for (uint16_t i = 0; i < m_input_count; i++) {
 			float delta = Config::Nn::Training::learning_rate * gradient * m_inputs[i];
-			m_weights[p][i] += delta + Config::Nn::Training::momentum * m_last_deltas[p][i];
 
+			m_weights[p][i] += delta + Config::Nn::Training::momentum * m_last_deltas[p][i];
 			m_last_deltas[p][i] = delta;
 		}
+		float delta = Config::Nn::Training::learning_rate * gradient;
+		m_weights[p][m_input_count] += delta + Config::Nn::Training::momentum * m_last_deltas[p][m_input_count];
+		m_last_deltas[p][m_input_count] = delta;
 	}
 }
 

@@ -4,8 +4,12 @@
 template <>
 void show_data(const vector& data, uint8_t precision, uint8_t min_digits)
 {
-	for (uint16_t x = 0; x < data.size(); x++)
-		printf("%+*.*f ", min_digits, precision, data[x]);
+	if (data.size() == 0)
+		return;
+
+	printf("%+*.*f", min_digits, precision, data[0]);
+	for (uint16_t x = 1; x < data.size(); x++)
+		printf(" %+*.*f", min_digits, precision, data[x]);
 	std::cout << std::endl;
 }
 
