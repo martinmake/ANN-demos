@@ -16,7 +16,7 @@ int main(void)
 
 	std::cout << std::endl << "CREATING " << Config::Nn::Training::Dataset::Fraction::training * 100 << "% TRAINING AND " << Config::Nn::Training::Dataset::Fraction::testing * 100 << "% TEST DATA MATRICES" << std::endl;
 
-	std::cout << std::endl << "CREATING A 4-7-3 RELU-SOFTMAX FULL CONNECTED NEURAL NETWORK" << std::endl;
+	std::cout << std::endl << "CREATING A 4-7-3 TANH-SOFTMAX FULL CONNECTED NEURAL NETWORK" << std::endl;
 	Fcnn fcnn(Config::Nn::architecture,
 		  Config::Nn::activation_funcs,
 		  Config::Nn::activation_funcs_derivs);
@@ -43,7 +43,7 @@ int main(void)
 	std::cout << "TRAINING COMPLETE" << std::endl;
 
 	std::cout << std::endl << "FINAL NETWORK WEIGHTS AND BIAS VALUES:" << std::endl;
-	fcnn.show_weights(4);
+	fcnn.show_weights(4, 9);
 
 	std::cout << std::endl << "ACCURACY ON TRAINING DATA: " << fcnn.accuracy.training * 100 << '%' << std::endl;
 	std::cout              << "ACCURACY ON TEST     DATA: " << fcnn.accuracy.testing  * 100 << '%' << std::endl;

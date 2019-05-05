@@ -30,7 +30,7 @@ class Layer
 
 		void set_weights(const matrix& weights);
 		void set_random_weights();
-		inline void show_weights(uint8_t precision) { show_data(m_weights, precision); }
+		inline void show_weights(uint8_t precision, uint8_t min_digits) { show_data(m_weights, precision, min_digits); }
 
 	private:
 		inline float generate_random_weight();

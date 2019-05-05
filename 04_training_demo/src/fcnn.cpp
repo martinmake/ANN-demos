@@ -60,20 +60,9 @@ void Fcnn::train(matrix& dataset)
 			       target_outputs(&dataset_training[d][m_input_count], &dataset_training[d][dataset_training[d].size()]);
 
 			backward(inputs, target_outputs);
-
-		// 	std::cout << "TARGER: ";
- 		// 	show_data(target_outputs, 4);
-		// 	std::cout << "OUTPUT: ";
- 		// 	show_data(m_outputs, 4);
-
 			if (is_correct(target_outputs))
 				accuracy.training++;
 		}
-
- 	// 	if (epoch % 100 == 0) {
- 	// 		printf("EPOCH: %7u\t\tOUTPUTS:\t", epoch);
- 	// 		show_data(m_outputs, 4);
- 	// 	}
  	}
 	accuracy.training /= Config::Nn::Training::max_epochs * dataset_training.size();
 
@@ -106,12 +95,12 @@ void Fcnn::set_random_weights()
 		m_layers[l].set_random_weights();
 }
 
-void Fcnn::show_weights(uint8_t precision)
+void Fcnn::show_weights(uint8_t precision, uint8_t min_digits)
 {
-	m_layers[0].show_weights(precision);
+	m_layers[0].show_weights(precision, min_digits);
 	for (uint8_t l = 1; l < m_layers.size(); l++) {
 		std::cout << std::endl;
-		m_layers[l].show_weights(precision);
+		m_layers[l].show_weights(precision, min_digits);
 	}
 }
 

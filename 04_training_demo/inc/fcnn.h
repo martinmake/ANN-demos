@@ -31,7 +31,7 @@ class Fcnn
 		void train(matrix& dataset);
 		void set_weights(const tensor& weights);
 		void set_random_weights();
-		void show_weights(uint8_t precision);
+		void show_weights(uint8_t precision, uint8_t min_digits);
 
 	private:
 		void test(const matrix& dataset);

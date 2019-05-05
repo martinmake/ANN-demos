@@ -15,6 +15,6 @@ using activation_func_deriv_t = float (*)(float outputs);
 using load_func_t = matrix& (*)(void);
 
 template <typename T>
-extern void show_data(const T& data, uint8_t precision);
+extern void show_data(const T& data, uint8_t precision = 2, uint8_t min_digits = 1);
 
 #endif
