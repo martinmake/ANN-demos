@@ -24,6 +24,7 @@ class Layer
 
 		vector& forward(const vector& inputs);
 
+		void acumulate_deltas(const vector& target_outputs);
 		void backward_output(const vector& target_outputs, vector& downstream_gradients);
 		void backward_hidden(vector& downstream_gradients);
 		void backward_last  (const vector& downstream_gradients);
