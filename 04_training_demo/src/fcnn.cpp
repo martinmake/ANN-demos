@@ -76,14 +76,14 @@ void Fcnn::train(matrix& dataset)
 
 void Fcnn::test(const matrix& dataset)
 {
-// 	std::cout << std::endl;
-// 	for (uint16_t epoch = 0; epoch <= Config::Nn::Training::max_epochs; epoch++) {
-// 		forward(target_outputs, inputs);
-// 		if (epoch % 100 == 0) {
-// 			printf("EPOCH: %7u\t\tOUTPUTS: ", epoch);
-// 			show_data(m_outputs, 4);
-// 		}
-// 	}
+	for (uint16_t d = 0; d < dataset.size(); d++) {
+		vector inputs        (&dataset[d][0], &dataset[d][m_input_count]),
+		       target_outputs(&dataset[d][m_input_count], &dataset[d][dataset[d].size()]);
+
+ 		forward(inputs);
+		if (is_correct(target_outputs))
+			accuracy.testing++;
+	}
 
 	accuracy.testing /= dataset.size();
 }
